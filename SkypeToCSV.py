@@ -23,4 +23,4 @@ df=pd.concat(multiple_df.tolist())
 df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
 
 translator = Translator()
-print (translator.translate('안녕하세요.'))
+print (translator.translate('안녕하세.'))
