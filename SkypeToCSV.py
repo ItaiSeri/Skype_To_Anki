@@ -20,6 +20,8 @@ norm=json_normalize(conver) #output: DataFrame, breaks up Series to DataFrame (w
 an=norm.MessageList[norm.displayName=='Anne Wu']
 an_df=pd.DataFrame(an[9])
 an_df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
+an_df['content_trimmed']= an_df['content'].str.replace(" ","")
+an_df['tr']=an_df.content_trimmed.apply(lambda x: translator.translate(x).text)
 ############
 
 multiple_df=norm.MessageList.apply(lambda x: pd.DataFrame(x))
@@ -32,7 +34,6 @@ translator = Translator()
 
 
 
-an_df['tr']=an_df.content.apply(lambda x: translator.translate(x).text)
 
 #an_df['tr']=an_df.content.apply(lambda x: len(x))
 
