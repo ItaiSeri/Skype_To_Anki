@@ -10,7 +10,23 @@ from pandas.io.json import json_normalize
 import googletrans
 from googletrans import Translator
 translator = Translator()
-import cld2
+
+from pycountry import languages
+import fasttext
+
+fasttext_model_path=r"C:\Users\Itai\Anaconda3\Lib\site-packages\fasttext/lid.176.bin"
+model = fasttext.load_model(fasttext_model_path)
+src_lang_='Chinese'
+
+sentences = ['zhè ér fù jìn yǒu chē zhàn ma ？ 这  儿 附 近  有  车  站   吗 ?']
+def check_lang(character,src_lang_):
+    lang_list=[]
+    predictions = model.predict(character,k=5)[0][0]
+    for pred in predictions:
+        pred=pred.replace('__label__','')
+        if languages.get(alpha_2=pred) is not None:
+            lang_list.append(languages.get(alpha_2=pred).name)
+    return src_lang_ in lang_list  
 
 
 src_lang='zh-CN'
@@ -27,6 +43,7 @@ an_df=pd.DataFrame(an[9])
 an_df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
 an_df['content_trimmed']= an_df['content'].str.replace(" ","")
 #an_df['is_src_lang']= an_df['content'].apply(lambda x: [translator.detect(word).lang==src_lang for word in x.split()])
+an_df['is_src_lang']= an_df['content'].apply(lambda x: [check_lang(word,src_lang_) for word in x.split()])
 #an_df['tr']=an_df.content_trimmed.apply(lambda x: translator.translate(x).text)
 ############
 
@@ -34,22 +51,9 @@ multiple_df=norm.MessageList.apply(lambda x: pd.DataFrame(x))
 df=pd.concat(multiple_df.tolist())
 #df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
 
-#isReliable, textBytesFound, details = cld2.detect("王明：那是杂志吗")
-#print('  reliable: %s' % (isReliable != 0))
-#print('  textBytes: %s' % textBytesFound)
-#print('  details: %s' % str(details))
 
-from pycountry import languages
-import fasttext
-fasttext_model_path=r"C:\Users\Itai\Anaconda3\Lib\site-packages\fasttext/lid.176.bin"
-model = fasttext.load_model(fasttext_model_path)
 
-sentences = ['我需要在这里']
-predictions = model.predict(sentences,k=5)[0][0]
-for pred in predictions:
-    pred=pred.replace('__label__','')
-    if languages.get(alpha_2=pred) is not None:
-        print (languages.get(alpha_2=pred).name)
+  
 #print(predictions)
 
 #if languages.get(alpha_2='he') is not None:
