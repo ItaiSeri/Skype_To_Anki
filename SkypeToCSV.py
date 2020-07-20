@@ -44,13 +44,16 @@ import fasttext
 fasttext_model_path=r"C:\Users\Itai\Anaconda3\Lib\site-packages\fasttext/lid.176.bin"
 model = fasttext.load_model(fasttext_model_path)
 
-sentences = ['需']
+sentences = ['我需要在这里']
 predictions = model.predict(sentences,k=5)[0][0]
 for pred in predictions:
-    print (languages.get(alpha_2=pred.replace('__label__','')).name)
+    pred=pred.replace('__label__','')
+    if languages.get(alpha_2=pred) is not None:
+        print (languages.get(alpha_2=pred).name)
 #print(predictions)
 
-lang_name = languages.get(alpha_2=model.predict(sentences)[0][0][0].replace('__label__','')).name
+#if languages.get(alpha_2='he') is not None:
+#    lang_name = languages.get(alpha_2='he').name
 #print(lang_name)
 
 
