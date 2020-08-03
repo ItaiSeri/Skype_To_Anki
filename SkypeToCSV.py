@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from pandas.io.json import json_normalize
+from itertools import compress
 
 import googletrans
 from googletrans import Translator
@@ -21,7 +22,7 @@ src_lang_='Chinese'
 sentences = 'wǒ qù dà chéng shì de diàn yǐng yuàn kàn diàn yǐng 。 \n我 去 大 城    市  的 电   影   院   看  电   影   。 '
 def check_lang(character,src_lang_):
     lang_list=[]
-    predictions = model.predict(character,k=5)[0]
+    predictions = model.predict(character,k=5,threshold=0.7)[0]
     for pred in predictions:
         pred=pred.replace('__label__','')
         if languages.get(alpha_2=pred) is not None:
@@ -41,9 +42,13 @@ norm=json_normalize(conver) #output: DataFrame, breaks up Series to DataFrame (w
 an=norm.MessageList[norm.displayName=='Anne Wu']
 an_df=pd.DataFrame(an[9])
 an_df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
-an_df['content_trim_split']= an_df['content'].str.replace(" ","").splitlines()
+an_df['content_trim_split']= an_df['content'].apply(lambda x: x.replace(" ","").splitlines()) #delete white spaces needs to be only in asian languages
 #an_df['is_src_lang']= an_df['content'].apply(lambda x: [translator.detect(word).lang==src_lang for word in x.split()])
-an_df['is_src_lang']= an_df['content'].apply(lambda x: [check_lang(word,src_lang_) for word in x.split()])
+an_df['is_src_lang']= an_df['content_trim_split'].apply(lambda x: [check_lang(string,src_lang_) for string in x])
+an_df['combine']= an_df[['content_trim_split','is_src_lang']].apply(tuple,axis=1)
+an_df['clean_content']=an_df['combine'].apply(lambda x: list(compress(x[0],x[1])))
+an_df['fltr']= an_df['clean_content'].apply(lambda x: not x)
+print(an_df[an_df['fltr']==False])
 #an_df['tr']=an_df.content_trimmed.apply(lambda x: translator.translate(x).text)
 ############
 
@@ -51,16 +56,10 @@ multiple_df=norm.MessageList.apply(lambda x: pd.DataFrame(x))
 df=pd.concat(multiple_df.tolist())
 #df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
 
+if not an_df.clean_content[0]:
+    print ('empty')
+    
 
-for x in b:
-    print (check_lang(x,src_lang_))
-
- #check_lang(x,src_lang_ 
-#print(predictions)
-
-#if languages.get(alpha_2='he') is not None:
-#    lang_name = languages.get(alpha_2='he').name
-#print(lang_name)
 
 
 
