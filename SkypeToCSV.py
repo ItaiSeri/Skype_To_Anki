@@ -48,7 +48,7 @@ an_df['is_src_lang']= an_df['content_trim_split'].apply(lambda x: [check_lang(st
 an_df['combine']= an_df[['content_trim_split','is_src_lang']].apply(tuple,axis=1)
 an_df['clean_content']=an_df['combine'].apply(lambda x: list(compress(x[0],x[1])))
 an_df['fltr']= an_df['clean_content'].apply(lambda x: not x)
-print(an_df[an_df['fltr']==False])
+fltrd_an_df=an_df.clean_content[an_df['fltr']==False].explode()
 #an_df['tr']=an_df.content_trimmed.apply(lambda x: translator.translate(x).text)
 ############
 
