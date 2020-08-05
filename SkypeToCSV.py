@@ -8,7 +8,7 @@ from pathlib import Path
 from pandas.io.json import json_normalize
 from itertools import compress
 
-import googletrans
+#import googletrans
 from googletrans import Translator
 translator = Translator()
 
@@ -48,16 +48,14 @@ an_df['is_src_lang']= an_df['content_trim_split'].apply(lambda x: [check_lang(st
 an_df['combine']= an_df[['content_trim_split','is_src_lang']].apply(tuple,axis=1)
 an_df['clean_content']=an_df['combine'].apply(lambda x: list(compress(x[0],x[1])))
 an_df['fltr']= an_df['clean_content'].apply(lambda x: not x)
-fltrd_an_df=an_df.clean_content[an_df['fltr']==False].explode()
-#an_df['tr']=an_df.content_trimmed.apply(lambda x: translator.translate(x).text)
+fltrd_an_df=an_df.clean_content[an_df['fltr']==False].explode().reset_index(drop=True)
+fltrd_an_df=pd.concat([fltrd_an_df,fltrd_an_df.apply(lambda x: translator.translate(x).text)],axis=1)
 ############
 
 multiple_df=norm.MessageList.apply(lambda x: pd.DataFrame(x))
 df=pd.concat(multiple_df.tolist())
 #df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
 
-if not an_df.clean_content[0]:
-    print ('empty')
     
 
 
