@@ -1,23 +1,25 @@
 import pandas as pd
+import fasttext
 from pathlib import Path
 from pandas.io.json import json_normalize
 from itertools import compress
-
-#import googletrans
 from googletrans import Translator
-translator = Translator()
-
 from pycountry import languages
-import fasttext
 
-fasttext_model_path=r"C:\Users\Itai\Anaconda3\Lib\site-packages\fasttext/lid.176.bin"
-model = fasttext.load_model(fasttext_model_path)
+
+translator = Translator() #googletrans
+
+#Local location of trained model for language detection. Explained in details here::
+#    https://fasttext.cc/docs/en/language-identification.html
+fasttext_model_path=r"C:\Users\Itai\Anaconda3\Lib\site-packages\fasttext\lid.176.bin" 
+fasttext_model = fasttext.load_model(fasttext_model_path)
+
 src_lang_='Chinese'
 
-sentences = 'wǒ qù dà chéng shì de diàn yǐng yuàn kàn diàn yǐng 。 \n我 去 大 城    市  的 电   影   院   看  电   影   。 '
+
 def check_lang(character,src_lang_):
     lang_list=[]
-    predictions = model.predict(character,k=5,threshold=0.7)[0]
+    predictions = fasttext_model.predict(character,k=5,threshold=0.7)[0]
     for pred in predictions:
         pred=pred.replace('__label__','')
         if languages.get(alpha_2=pred) is not None:
@@ -27,7 +29,7 @@ def check_lang(character,src_lang_):
 
 src_lang='zh-CN'
 
-path=Path("F:\Dowloads\8_itai.seri_export/messages.json")
+path=Path(r"F:\Dowloads\8_itai.seri_export\messages.json")
 expath=Path("F:/Dowloads")
 
 msg =pd.read_json(path,encoding='utf-8') #output: DataFrame, all relavent data in 'conversations' column 
