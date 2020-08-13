@@ -32,25 +32,17 @@ src_lang='zh-CN'
 Skype_Json=Path(r"F:\Dowloads\8_itai.seri_export\messages.json")
 expath=Path("F:/Dowloads")
 contact_list=['Wendy K','Anne Wu']
-#def Skype2Anki():
+#def Skype2Anki(contact_list):
+    #add date slicing - try finding something more accurate than original arrival time
+    #maby filter with messagetype
     
-
-# msg =pd.read_json(Skype_Json,encoding='utf-8') #output: DataFrame, all relavent data in 'conversations' column 
-# conver=msg.conversations #output: Series
-# norm=json_normalize(conver) #output: DataFrame, breaks up Series to DataFrame (with meaningfull columns)
-
-#Read conversations column from Skype's Json file, then normalize I.E break up to meaningful columns
+#Read conversations column from Skype's Json file, then normalize. I.E Break up Series to df with meaningful columns
 normalized=json_normalize(pd.read_json(Skype_Json,encoding='utf-8').conversations)
 
-multiple_df=normalized.MessageList[normalized.displayName.isin(contact_list)].apply(lambda x: pd.DataFrame(x))
-df=pd.concat(multiple_df.tolist())
-#an.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
-
-# multiple_df=normalized.MessageList[normalized.displayName.isin(contact_list)].apply(lambda x: pd.DataFrame(x))
-# df=pd.concat(multiple_df.tolist())
+#Convert the MessageList of every contact to df, then concat all of them into one df 
+df=pd.concat(normalized.MessageList[normalized.displayName.isin(contact_list)].apply(lambda x: pd.DataFrame(x)).tolist())
 
 df['content_trim_split']= df['content'].apply(lambda x: x.replace(" ","").splitlines()) #delete white spaces needs to be only in asian languages
-#df['is_src_lang']= df['content'].apply(lambda x: [translator.detect(word).lang==src_lang for word in x.split()])
 df['is_src_lang']= df['content_trim_split'].apply(lambda x: [check_lang(string,src_lang_) for string in x])
 df['combine']= df[['content_trim_split','is_src_lang']].apply(tuple,axis=1)
 df['clean_content']=df['combine'].apply(lambda x: list(compress(x[0],x[1])))
@@ -61,11 +53,7 @@ Pinyin=fltrd_df.apply(lambda x: translator.translate(x,dest='zh-CN').pronunciati
 Anki_CSV=pd.concat([fltrd_df,Translation,Pinyin],axis=1)
 Anki_CSV.columns=['Source','Translation','Pinyin']
 Anki_CSV.to_csv(expath/'Anki_CSV.txt', index=None, mode='a')
-############
 
-# multiple_df=norm.MessageList.apply(lambda x: pd.DataFrame(x))
-# df=pd.concat(multiple_df.tolist())
-#df.content.to_csv(expath/'conv.txt', header=None, index=None, mode='a')
 
     
 
