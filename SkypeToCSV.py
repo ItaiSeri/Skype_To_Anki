@@ -1,5 +1,6 @@
 import pandas as pd
 import fasttext
+import time
 from pathlib import Path
 from itertools import compress
 from googletrans import Translator
@@ -30,24 +31,26 @@ def SplitAndTrim(x):
     return x.replace(" ","").splitlines()
 
 
-    
-#src_lang='zh-CN'
 
 Skype_file_path=Path(r"F:\Dowloads\8_itai.seri_export\messages.json")
 expath=Path("F:/Dowloads")
 contact_list=['Wendy K','Anne Wu']
 
-def Skype2Anki(Skype_file_path,contact_list,src_lang):
+def Skype2Anki(Skype_file_path,contact_list,src_lang\
+               ,start_date='2000-01-01',end_date='2099-01-01'):
     #add date slicing - try finding something more accurate than original arrival time
     #maby filter with messagetype
     #add .split('') to split by for instance =. like in Wendy K
     
-    
+    start = time.time()
     #Read conversations column from Skype's Json file, then normalize. I.E Break up Series to df with meaningful columns
     normalized=pd.json_normalize(pd.read_json(Skype_file_path,encoding='utf-8').conversations)
 
     #Convert the MessageList of every contact to df, then concat all of them into one df 
     df=pd.concat(normalized.MessageList[normalized.displayName.isin(contact_list)].apply(lambda x: pd.DataFrame(x)).tolist())
+    #Filter df by datetime
+    df.originalarrivaltime=pd.to_datetime(df.originalarrivaltime)
+    df=df[(df['originalarrivaltime'] > start_date) & (df['originalarrivaltime'] < end_date)]
 
     #delete white spaces needs to be only in asian languages
     df['content_trim_split']= df['content'].apply(SplitAndTrim)
@@ -67,7 +70,10 @@ def Skype2Anki(Skype_file_path,contact_list,src_lang):
     Anki_CSV=pd.concat([fltrd_df,Translation,Pinyin],axis=1)
     Anki_CSV.columns=['Source','Translation','Pinyin']
     Anki_CSV.to_csv(expath/'Anki_CSV.txt', index=None, mode='a')
-    print('CSV file created!')
+    end = time.time()
+    runtime= end - start
+    print('CSV file created after '+ str(runtime) + ' seconds.\nLocation: ' +str(expath/'Anki_CSV.txt'))
+
 
 
     
