@@ -42,8 +42,7 @@ expath=Path("F:/Dowloads")
 contact_list=['Anne Wu']
 #'Anne Wu','Wendy K'
 
-def Skype2Anki(Skype_file_path,contact_list,src_lang\
-               ,start_date='2000-01-01',end_date='2099-01-01'):
+def Skype2Anki(Skype_file_path,contact_list,src_lang,trim=True, split_del='\n',start_date='2000-01-01',end_date='2099-01-01'):
 
 
     start = time.time()
@@ -58,7 +57,7 @@ def Skype2Anki(Skype_file_path,contact_list,src_lang\
     df=df[(df['originalarrivaltime'] > start_date) & (df['originalarrivaltime'] < end_date)]
     
     #delete white spaces needs to be only in asian languages
-    df['content_trim_split']= df['content'].apply(SplitAndTrim)
+    df['content_trim_split']= df['content'].apply(lambda x: SplitAndTrim(x,trim, split_del))
      #apply the function for every word
     df['is_src_lang']= df['content_trim_split'].apply(lambda x: [check_lang(string,src_lang) for string in x])
     #Delete lists where text is not in the source language
