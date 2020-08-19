@@ -10,5 +10,5 @@ Also, you will need to download a file that contains a model for language identi
 Download from [here](https://fasttext.cc/docs/en/language-identification.html) the file named: *lid.176.bin*
 
 ### Usage
-Example:
-`Skype2Anki(Skype_file_path,contact_list,src_lang,'2000-01-01','2099-01-01')`
+Run the function:
+`Skype2Anki(Skype_file_path,contact_list,src_lang)`
